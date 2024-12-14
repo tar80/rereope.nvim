@@ -1,5 +1,3 @@
----@meta helper
----@class helper
 local M = {}
 
 ---@alias LogLevels 'TRACE'|'DEBUG'|'INFO'|'WARN'|'ERROR'|'OFF'
