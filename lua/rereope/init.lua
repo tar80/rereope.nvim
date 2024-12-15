@@ -211,17 +211,15 @@ function rereope:increase_reginfo()
   self.reginfo = vim.fn.getreginfo(self.regname)
 end
 
--- local function determine_winheight(start_row, end_row)
---   vim.print(Instance.reginfo, Instance.mode)
---   ---@type integer
---   local winheight
---   if is_blockwise(Instance.mode) then
---     winheight = #Instance.reginfo.regcontents
---   else
---     winheight = end_row - start_row + 1
---   end
---   return winheight
--- end
+local function adjust_end_col(end_row, end_col)
+  if end_col > 1 then
+    end_col = end_col - 1
+    local line = vim.api.nvim_buf_get_lines(0, end_row, end_row + 1, false)[1]
+    local charwidth = #vim.fn.strcharpart(line, end_col, 1)
+    end_col = end_col + charwidth
+  end
+  return end_col
+end
 
 function rereope.operator(motionwise)
   Instance:initial_related_options()
@@ -247,6 +245,7 @@ function rereope.operator(motionwise)
       end_col = zero_based('col', '$')
     end
   end
+  end_col = adjust_end_col(end_row, end_col)
 
   if (start_row > end_row) or (start_row == end_row and start_col > end_col) then
     -- print('[rereope.nvim] debug: error range')

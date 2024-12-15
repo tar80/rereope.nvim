@@ -8,7 +8,7 @@ local INFOTIP_DEFAULT = {
   focusable = false,
   zindex = 200,
   style = 'minimal',
-  border = { '', '', '', ' ', '', '', '', '>' },
+  border = { '', '', '', '', '', '', '', '>' },
   noautocmd = true,
 }
 
@@ -62,7 +62,7 @@ function M.infotip(ns, contents, opts)
   local anchor, row, max_row = get_direction(winsize.height)
   local float_conf = INFOTIP_DEFAULT
   float_conf.height = math.min(max_row, winsize.height)
-  float_conf.width = winsize.width
+  float_conf.width = winsize.width + 1
   float_conf.row = row
   float_conf.anchor = anchor
   float_conf.border = opts.border or float_conf.border
