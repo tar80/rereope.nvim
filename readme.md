@@ -32,7 +32,7 @@ Rereope provides only one method `rereope.open`.
 `rereope.open` first inputs the trigger key, followed by the register key.  
 For example: `<trigger-key>[register-key]{motion}`.
 
-Additionally, it is also possible to perform the operation in the original way
+Additionally, it is also possible to perform the operation in the original way  
 by inputting the register key first, followed by the trigger key.  
 For example: `"[register-key]<trigger-key>{motion}`
 
@@ -158,9 +158,9 @@ without using the motion option.
 
 ## Highlights
 
-- `RereopeHintBg` (defalut:PmenuSel) Uses popup hint
-- `RereopeHintBorder` (default:PmenuSel) Uses popup hint
-- `RereopeVisualFlash` (default:opts.beacon.hlgroup or IncSearch) Uses replaced linewise contents
+- `RereopeHintBg` (defalut:`PmenuSel`) Uses popup hint
+- `RereopeHintBorder` (default:`PmenuSel`) Uses popup hint
+- `RereopeVisualFlash` (default:`opts.beacon.hlgroup` or `IncSearch`) Uses replaced linewise contents
 
 ### Issues
 
@@ -182,5 +182,5 @@ but I have other things to do, so I'll put it off.
 
 ## Acknowledgment
 
-[vim-operator-replace](https://github.com/kana/vim-operator-replace)  
-[vim-ReplaceWithRegister](https://github.com/inkarkat/vim-ReplaceWithRegister)
+- [vim-operator-replace](https://github.com/kana/vim-operator-replace)
+- [vim-ReplaceWithRegister](https://github.com/inkarkat/vim-ReplaceWithRegister)
