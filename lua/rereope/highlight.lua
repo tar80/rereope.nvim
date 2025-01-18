@@ -18,20 +18,21 @@ function M.fade_color(rgb, attenuation)
   local g = tonumber(rgb:sub(3, 4), 16)
   local b = tonumber(rgb:sub(5, 6), 16)
 
-  attenuation = (attenuation / 100) * 255
-  if vim.go.background == 'light' then
-    r = r + attenuation * (1 - r / 255)
-    g = g + attenuation * (1 - g / 255)
-    b = b + attenuation * (1 - b / 255)
-  else
-    r = r - attenuation
-    g = g - attenuation
-    b = b - attenuation
+  if attenuation < 0 or attenuation > 100 then
+    return false, 'Invalid attenuation value'
   end
 
-  r = math.max(0, r)
-  g = math.max(0, g)
-  b = math.max(0, b)
+  attenuation = (attenuation / 100) * 255
+
+  if vim.go.background == 'light' then
+    r = math.min(255, r + attenuation * (1 - r / 255))
+    g = math.min(255, g + attenuation * (1 - g / 255))
+    b = math.min(255, b + attenuation * (1 - b / 255))
+  else
+    r = math.max(0, r - attenuation)
+    g = math.max(0, g - attenuation)
+    b = math.max(0, b - attenuation)
+  end
 
   return true, ('#%02X%02X%02X'):format(r, g, b)
 end
