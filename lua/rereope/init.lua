@@ -150,6 +150,8 @@ local function extract_region(from, to, inclusive)
   start_row, start_col = vim.fn.line(from), vim.fn.col(from)
   end_row, end_col = vim.fn.line(to), vim.fn.col(to) + last
   local max_col = vim.fn.col({ end_row, '$' }) - 1
+  local line = vim.api.nvim_get_current_line()
+  end_col = end_col + vim.str_utf_end(line, end_col)
   return start_row - 1, start_col - 1, end_row - 1, math.min(max_col, end_col)
 end
 
@@ -211,16 +213,6 @@ function rereope:increase_reginfo()
   self.reginfo = vim.fn.getreginfo(self.regname)
 end
 
-local function adjust_end_col(end_row, end_col)
-  if end_col > 1 then
-    end_col = end_col - 1
-    local line = vim.api.nvim_buf_get_lines(0, end_row, end_row + 1, false)[1]
-    local charwidth = #vim.fn.strcharpart(line, end_col, 1)
-    end_col = end_col + charwidth
-  end
-  return end_col
-end
-
 function rereope.operator(motionwise)
   Instance:initial_related_options()
   if Instance.is_repeat and Instance.regname:match('^[1-9]$') then
@@ -245,7 +237,6 @@ function rereope.operator(motionwise)
       end_col = zero_based('col', '$')
     end
   end
-  end_col = adjust_end_col(end_row, end_col)
 
   if (start_row > end_row) or (start_row == end_row and start_col > end_col) then
     -- print('[rereope.nvim] debug: error range')
