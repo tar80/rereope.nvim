@@ -2,13 +2,14 @@
 local rereope = {}
 local Instance = {}
 
-local PLUGIN_NAME = 'rereope.nvim'
+local UNIQUE_NAME = 'rereope.nvim'
 local OPERATOR_FUNC = "v:lua.require'rereope'.operator"
 local VISUAL_BG = 'RereopeVisualFlash'
 local HLGROUP = { BG = 'RereopeHintBg', BORDER = 'RereopeHintBorder' }
 
-local ns = vim.api.nvim_create_namespace(PLUGIN_NAME)
-local augroup = vim.api.nvim_create_augroup(PLUGIN_NAME, { clear = true })
+local ns = vim.api.nvim_create_namespace(UNIQUE_NAME)
+local augroup = vim.api.nvim_create_augroup(UNIQUE_NAME, { clear = true })
+local with_unique_name = require('rereope.util').name_formatter(UNIQUE_NAME)
 
 ---@type true?
 local hl_loaded
@@ -16,6 +17,7 @@ local hl_loaded
 local function set_operatorfunc()
   vim.o.operatorfunc = OPERATOR_FUNC
   vim.api.nvim_create_autocmd({ 'OptionSet' }, {
+    desc = with_unique_name('%s: reset instance'),
     group = augroup,
     pattern = 'operatorfunc',
     once = true,
@@ -50,7 +52,7 @@ local function set_visual_bg(hlgroup)
 end
 
 vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
-  desc = 'Rereope reset highlight flag',
+  desc = with_unique_name('%s: reset highlights'),
   group = augroup,
   callback = function(_)
     hl_loaded = nil
@@ -111,6 +113,7 @@ function rereope.popup_hint(self)
     vim.schedule(function()
       local float_win = require('rereope.render').infotip(ns, self.reginfo.regcontents, self.hint_options)
       vim.api.nvim_create_autocmd({ 'ModeChanged' }, {
+        desc = with_unique_name('%s: close hint window'),
         group = augroup,
         pattern = 'no:[nc]*',
         once = true,
@@ -172,7 +175,7 @@ function rereope:substitution(start_row, start_col, end_row, end_col)
       vim.notify(
         'The content of blockwise registers does not support pasting in visual-mode.',
         vim.log.levels.INFO,
-        { title = PLUGIN_NAME }
+        { title = UNIQUE_NAME }
       )
       return false
     end
@@ -285,13 +288,13 @@ end
 
 function rereope.open(alterkey, opts)
   if vim.bo.readonly or not vim.bo.modifiable then
-    vim.notify('Could not replace. Write protected.', vim.log.levels.INFO, { title = PLUGIN_NAME })
+    vim.notify('Could not replace. Write protected.', vim.log.levels.INFO, { title = UNIQUE_NAME })
     return
   end
   local rgx = '["%-%w:%.%%#%*%+~=_/]'
   local register = vim.v.register
   if register == '"' then
-    register = vim.fn.nr2char(vim.fn.getchar())
+    register = vim.fn.nr2char(vim.fn.getchar(-1, { number = true }) --[[@as integer]])
     alterkey = alterkey or '\\'
     if register == alterkey then
       register = '"'
