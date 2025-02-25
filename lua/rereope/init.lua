@@ -154,7 +154,9 @@ local function extract_region(from, to, inclusive)
   end_row, end_col = vim.fn.line(to), vim.fn.col(to) + last
   local max_col = vim.fn.col({ end_row, '$' }) - 1
   local line = vim.api.nvim_get_current_line()
-  end_col = end_col + vim.str_utf_end(line, end_col)
+  if #line > 0 then
+    end_col = end_col + vim.str_utf_end(line, end_col)
+  end
   return start_row - 1, start_col - 1, end_row - 1, math.min(max_col, end_col)
 end
 
