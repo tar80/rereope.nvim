@@ -1,0 +1,154 @@
+*rereope.txt*                                     Replace with Register Operator
+
+Author: tar80 (https://github.com/tar80)
+License: Apache License
+Repository: https://github.com/tar80/rereope
+
+CONTENTS                                                      *rereope-contents*
+
+Introduction                                              |rereope-introduction|
+Interface                                                    |rereope-interface|
+  function                                                    |rereope-function|
+  hlgroup                                                      |rereope-hlgroup|
+
+==============================================================================
+INTRODUCTION                                              *rereope-introduction*
+
+*rereope.nvim* provides an efficient key for register operations.
+It actually offers only one method, which can be used repeatedly.
+
+==============================================================================
+INTERFACE                                                    *rereope-interface*
+
+------------------------------------------------------------------------------
+FUNCTION                                                      *rereope-function*
+
+open(alternative-key, { end_point, beacon, hint, motion, replace })
+
+        Maps to the operator trigger key and is used as follows.
+
+>lua
+        vim.keymap.set({'n', 'x'}, '_', function()
+            local opts = {replace = {
+                fallback = function(line)
+                    return line:format('- %s')
+                end
+                }
+            }
+            return require('rereope').open('_', opts)
+        end, {desc = 'rereope.nvim: respects vim-operator-replace'})
+
+        vim.keymap.set({'n', 'x'}, 'gr', function()
+            local opts = {
+                end_point = true,
+                beacon = { 'Float', 100, 30, 15},
+                hint = { winblend = 10, border = 'rounded'}
+            }
+            return require('rereope').open('r', opts)
+        end, {desc = 'rereope.nvim: respects vim-ReplaceWithRegister'})
+<
+
+        It supports the following two types of key operations:
+           1. <trigger-key>[register-key]{motion}
+           2. "[register-key]<trigger-key>{motion}
+
+        Parameters: ~
+              {alternative-key} (string|nil): |rereope-alternative-key|
+              {end_point}       (boolean):    |rereope-end-point|
+              {beacon}          (dictionaly): |rereope-beacon|
+              {hint}            (table):      |rereope-hint|
+              {motion}          (function):   |rereope-motion|
+              {replace}         (table):      |rereope-replace|
+
+rereope-alternative-key                                *rereope-alternative-key*
+        Type: string|nil
+        Default: "\"
+
+        An alternative key for unnamed registers.
+        This is provided for the simplification of key operations.
+
+rereope-end-point                                            *rereope-end-point*
+        Type: boolean
+        Default: false
+
+        Moves the cursor to the end of the replacement string
+        after executing the replacement.
+
+rereope-beacon                                                  *rereope-beacon*
+        Type: [
+            hlgroup: string,
+            interval: integer,
+            winblend: integer,
+            decay: integer
+        ]
+        Default: nil
+
+        Flashes the replacement string.
+
+rereope-hint                                                      *rereope-hint*
+        Type: {
+            winblend:integer,
+            border:"single"|"double"|"rounded"|"solid"|"shadow"|string[]|nil
+        }
+        Default: {}
+
+        Displays the contents of the register in a popup.
+        Specify the value for the option 'winblend'.
+        For border, please refer to |nvim_open_win()|.
+
+rereope-motion                                                  *rereope-motion*
+        Type: function()
+        Default: nil
+
+        Specifies the operator key to send after selecting the register.
+>lua
+        --You can send keys directly.
+        motion = function()
+            vim.api.nvim_input('_')
+        end
+
+        -- Alternatively, you can send keys through the plugin.
+        motion = function()
+            if vim.treesitter.get_node() then
+            require('flash').treesitter()
+            end
+        end
+<
+rereope-replace                                                *rereope-replace*
+        Type: replace {
+            mode:string|nil,
+            regname:string|nil,
+            regtype:string|nil,
+            fallback: fun(line:string):line:string
+        }
+        Default: nil
+
+        Replaces and pastes the string from the register.
+        The fallback is executed when the conditions for mode, regname, and
+        regtype are met.
+>lua
+        replace = {
+            regtype = '\x16', -- limited to blockwise-mode
+            fallback = function(line)
+                return string.format('<%s>', line)
+            end
+        }
+<
+
+------------------------------------------------------------------------------
+HLGROUP                                                        *rereope-hlgroup*
+
+*RereopeHintBg*
+
+        Used for the background of popup hints.
+
+*RereopeHintBorder*
+
+        Used for the border of popup hints.
+
+*RereopeVisualFlash*
+
+        Used for flashing multiple lines.
+
+==============================================================================
+vim:tw=78:sw=4:ts=8:ft=help:norl:noet:

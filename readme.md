@@ -160,7 +160,7 @@ without using the motion option.
 
 - `RereopeHintBg` (defalut:`PmenuSel`) Uses popup hint
 - `RereopeHintBorder` (default:`PmenuSel`) Uses popup hint
-- `RereopeVisualFlash` (default:`opts.beacon.hlgroup` or `IncSearch`) Uses replaced linewise contents
+- `RereopeVisualFlash` (default:`IncSearch`) Uses replaced linewise contents
 
 ### Issues
 
@@ -176,9 +176,7 @@ The planned implementation has been completed. Next,
 
 - [ ] write tests,
 - [ ] fix bugs,
-- [ ] write help document,
-
-but I have other things to do, so I'll put it off.
+- [x] write help document,
 
 ## Acknowledgment
 
