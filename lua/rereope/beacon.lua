@@ -1,6 +1,6 @@
 local M = {}
-
 local helper = require('rereope.helper')
+local validate = require('rereope.compat').validate
 
 ---@private
 local DEFAULT_OPTIONS = {
@@ -17,10 +17,10 @@ local DEFAULT_OPTIONS = {
 ---@param blend integer Initial value of winblend
 ---@param decay integer winblend becay
 function M.new(hlgroup, interval, blend, decay)
-  vim.validate('hlgroup', hlgroup, 'string', true)
-  vim.validate('interval', interval, 'number', true)
-  vim.validate('blend', blend, 'number', true)
-  vim.validate('decay', decay, 'number', true)
+  validate('hlgroup', hlgroup, 'string', true)
+  validate('interval', interval, 'number', true)
+  validate('blend', blend, 'number', true)
+  validate('decay', decay, 'number', true)
   return setmetatable({
     timer = assert(vim.uv.new_timer()),
     is_running = false,

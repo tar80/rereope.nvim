@@ -18,7 +18,7 @@
 ---@field substitution fun(self,start_row:integer,start_col:integer,end_row:integer,end_col:integer):boolean?
 ---@field increase_reginfo fun(self)
 ---@field operator fun(motionwise:string)
----@field open fun(alterkey:string, RereopeOptions)
+---@field open fun(alterkey:string|nil, RereopeOptions)
 ---@field setup fun()
 
 ---@class Instance

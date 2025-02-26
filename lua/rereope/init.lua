@@ -76,8 +76,8 @@ function rereope.new(regname, opts)
   self['end_point'] = opts.end_point
   self['hint_options'] = opts.hint
   self['beacon'] = type(opts.beacon) == 'table' and require('rereope.beacon').new(unpack(opts.beacon))
-  self['replace'] = opts.replace
   self['motion'] = opts.motion
+  self['replace'] = opts.replace
   return self
 end
 
@@ -296,7 +296,7 @@ function rereope.open(alterkey, opts)
   local rgx = '["%-%w:%.%%#%*%+~=_/]'
   local register = vim.v.register
   if register == '"' then
-    register = vim.fn.nr2char(vim.fn.getchar(-1, { number = true }) --[[@as integer]])
+    register = vim.fn.nr2char(vim.fn.getchar() --[[@as integer]])
     alterkey = alterkey or '\\'
     if register == alterkey then
       register = '"'
