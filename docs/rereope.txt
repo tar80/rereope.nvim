@@ -60,22 +60,25 @@ Maps to the operator trigger key and is used as follows.
               {replace}         (table):      |rereope-replace|
 
 rereope-alternative-key                                *rereope-alternative-key*
-An alternative key for unnamed registers.
-This is provided for the simplification of key operations.
+
+        An alternative key for unnamed registers.
+        This is provided for the simplification of key operations.
 
         Type: string|nil
         Default: "\"
 
 
 rereope-end-point                                            *rereope-end-point*
-Moves the cursor to the end of the replacement string
-after executing the replacement.
+
+        Moves the cursor to the end of the replacement string
+        after executing the replacement.
 
         Type: boolean
         Default: false
 
 rereope-beacon                                                  *rereope-beacon*
-Flashes the replacement string.
+
+        Flashes the replacement string.
 
         Type: [
             hlgroup: string,
@@ -86,9 +89,10 @@ Flashes the replacement string.
         Default: nil
 
 rereope-hint                                                      *rereope-hint*
-Displays the contents of the register in a popup.
-Specify the value for the option 'winblend'.
-For border, please refer to |nvim_open_win()|.
+
+        Displays the contents of the register in a popup.
+        Specify the value for the option 'winblend'.
+        For border, please refer to |nvim_open_win()|.
 
         Type: {
             winblend:integer,
@@ -97,7 +101,8 @@ For border, please refer to |nvim_open_win()|.
         Default: {}
 
 rereope-motion                                                  *rereope-motion*
-Specifies the operator key to send after selecting the register.
+
+        Specifies the operator key to send after selecting the register.
 
         Type: function()
         Default: nil
@@ -116,9 +121,10 @@ Specifies the operator key to send after selecting the register.
         end
 <
 rereope-replace                                                *rereope-replace*
-Replaces and pastes the string from the register.
-The fallback is executed when the conditions for mode, regname, and
-regtype are met.
+
+        Replaces and pastes the string from the register.
+        The fallback is executed when the conditions for mode, regname, and
+        regtype are met.
 
         Type: replace {
             mode:string|nil,
