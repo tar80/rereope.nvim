@@ -2,7 +2,7 @@
 
 Author: tar80 (https://github.com/tar80)
 License: Apache License
-Repository: https://github.com/tar80/rereope
+Repository: https://github.com/tar80/rereope.nvim
 
 CONTENTS                                                      *rereope-contents*
 

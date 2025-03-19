@@ -1,3 +1,4 @@
+---@class util
 local M = {}
 
 -- Returns a closure for formatting a message with a given "name".
