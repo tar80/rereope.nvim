@@ -79,12 +79,20 @@ rereope.open(alternative-key, { end_point, beacon, hint, motion, replace })
 ```lua
 {
     'tar80/rereope.nvim',
-    opts = {}, -- for requirements. rereope.nvim has no options.
+    opts = {
+        map_cyclic_register_keys = { prev = '<C-p>', next = '<C-n>' },
+    },
     keys = {
         ...
     }
 }
 ```
+
+> [!NOTE]
+> `map_cyclic_register_keys` has been added. Passing a table to this value adds
+> an `omap` to cycle through registers 0-9 in rereope's operator-pending mode.
+
+![rereope_cycle_registers](https://github.com/user-attachments/assets/58a745fc-503a-4f83-bff5-1fb9bb0c4c60)
 
 ## Configurations
 

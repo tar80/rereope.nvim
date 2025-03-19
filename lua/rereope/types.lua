@@ -36,6 +36,7 @@
 ---@field replace Replace
 ---@field motion fun()
 ---@field is_repeat boolean
+---@field float [integer,integer]
 
 ---@class Beacon:BeaconInstance
 ---@field new fun(hl:string,interval:integer,blend:integer,decay:integer):BeaconInstance

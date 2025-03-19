@@ -9,13 +9,14 @@ CONTENTS                                                      *rereope-contents*
 Introduction                                              |rereope-introduction|
 Interface                                                    |rereope-interface|
   function                                                    |rereope-function|
+  configuration                                          |rereope-configuration|
   hlgroup                                                      |rereope-hlgroup|
 
 ==============================================================================
 INTRODUCTION                                              *rereope-introduction*
 
-*rereope.nvim* provides an efficient key for register operations.
-It actually offers only one method, which can be used repeatedly.
+*rereope.nvim* provides efficient register pasting operations.
+It functions in a dot-repeatable manner.
 
 ==============================================================================
 INTERFACE                                                    *rereope-interface*
@@ -23,8 +24,17 @@ INTERFACE                                                    *rereope-interface*
 ------------------------------------------------------------------------------
 FUNCTION                                                      *rereope-function*
 
+setup({cfg})                                                   *rereope.setup()*
+
+    Setup rereope
+
+        Parameters: ~
+              {map_cyclic_register_keys} (talbe): |rereope-cyclic-register-keys|
+
+
 open(alternative-key, { end_point, beacon, hint, motion, replace })
-Maps to the operator trigger key and is used as follows.
+
+    Maps to the operator trigger key and is used as follows.
 
 >lua
         vim.keymap.set({'n', 'x'}, '_', function()
@@ -59,89 +69,107 @@ Maps to the operator trigger key and is used as follows.
               {motion}          (function):   |rereope-motion|
               {replace}         (table):      |rereope-replace|
 
-rereope-alternative-key                                *rereope-alternative-key*
 
-        An alternative key for unnamed registers.
-        This is provided for the simplification of key operations.
+    rereope-alternative-key                            *rereope-alternative-key*
 
-        Type: string|nil
-        Default: "\"
+            An alternative key for unnamed registers.
+            This is provided for the simplification of key operations.
+
+            Type: string|nil
+            Default: "\"
 
 
-rereope-end-point                                            *rereope-end-point*
+    rereope-end-point                                        *rereope-end-point*
 
-        Moves the cursor to the end of the replacement string
-        after executing the replacement.
+            Moves the cursor to the end of the replacement string
+            after executing the replacement.
 
-        Type: boolean
-        Default: false
+            Type: boolean
+            Default: false
 
-rereope-beacon                                                  *rereope-beacon*
+    rereope-beacon                                              *rereope-beacon*
 
-        Flashes the replacement string.
+            Flashes the replacement string.
 
-        Type: [
-            hlgroup: string,
-            interval: integer,
-            winblend: integer,
-            decay: integer
-        ]
-        Default: nil
+            Type: [
+                hlgroup: string,
+                interval: integer,
+                winblend: integer,
+                decay: integer
+            ]
+            Default: nil
 
-rereope-hint                                                      *rereope-hint*
+    rereope-hint                                                  *rereope-hint*
 
-        Displays the contents of the register in a popup.
-        Specify the value for the option 'winblend'.
-        For border, please refer to |nvim_open_win()|.
+            Displays the contents of the register in a popup.
+            Specify the value for the option 'winblend'.
+            For border, please refer to |nvim_open_win()|.
 
-        Type: {
-            winblend:integer,
-            border:"single"|"double"|"rounded"|"solid"|"shadow"|string[]|nil
-        }
-        Default: {}
+            Type: {
+                winblend:integer,
+                border:"single"|"double"|"rounded"|"solid"|"shadow"|string[]|nil
+            }
+            Default: {}
 
-rereope-motion                                                  *rereope-motion*
+    rereope-motion                                              *rereope-motion*
 
-        Specifies the operator key to send after selecting the register.
+            Specifies the operator key to send after selecting the register.
 
-        Type: function()
-        Default: nil
+            Type: function()
+            Default: nil
 
 >lua
-        --You can send keys directly.
-        motion = function()
-            vim.api.nvim_input('_')
-        end
-
-        -- Alternatively, you can send keys through the plugin.
-        motion = function()
-            if vim.treesitter.get_node() then
-            require('flash').treesitter()
+            --You can send keys directly.
+            motion = function()
+                vim.api.nvim_input('_')
             end
-        end
+
+            -- Alternatively, you can send keys through the plugin.
+            motion = function()
+                if vim.treesitter.get_node() then
+                require('flash').treesitter()
+                end
+            end
 <
+
 rereope-replace                                                *rereope-replace*
 
-        Replaces and pastes the string from the register.
-        The fallback is executed when the conditions for mode, regname, and
-        regtype are met.
+            Replaces and pastes the string from the register.
+            The fallback is executed when the conditions for mode, regname,
+            and regtype are met.
 
-        Type: replace {
-            mode:string|nil,
-            regname:string|nil,
-            regtype:string|nil,
-            fallback: fun(line:string):line:string
-        }
-        Default: nil
+            Type: replace {
+                mode:string|nil,
+                regname:string|nil,
+                regtype:string|nil,
+                fallback: fun(line:string):line:string
+            }
+            Default: nil
 
 >lua
-        replace = {
-            regtype = '\x16', -- limited to blockwise-mode
-            fallback = function(line)
-                return string.format('<%s>', line)
-            end
-        }
+            replace = {
+                regtype = '\x16', -- limited to blockwise-mode
+                fallback = function(line)
+                    return string.format('<%s>', line)
+                end
+            }
 <
+------------------------------------------------------------------------------
+CONFIGURATION                                            *rereope-configuration*
+
+
+Default settings ~
+
+map_cyclic_register_keys                          *rereope-cyclic-register-keys*
+
+    Add next and previous register mapping to omap. This allows you to
+    cycle through the 0-9 registers while in operator-pending mode.
+
+        Type: talbe,
+        Default: {
+          next = '<C-n>',
+          prev = '<C-p>',
+        }
 
 ------------------------------------------------------------------------------
 HLGROUP                                                        *rereope-hlgroup*

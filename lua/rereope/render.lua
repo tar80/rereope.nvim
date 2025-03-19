@@ -75,4 +75,31 @@ function M.infotip(ns, contents, opts)
   return { bufnr, winid }
 end
 
+---@param bufnr integer
+---@param winid integer
+---@param contents string[]
+function M.infotip_overwrite(bufnr, winid, contents)
+  local has_contents, winsize = get_winsize(contents)
+  if not has_contents then
+    return
+  end
+  ---@cast winsize -nil
+  local anchor, _, max_row = get_direction(winsize.height)
+  local float_conf = {}
+  float_conf.height = math.min(max_row, winsize.height)
+  float_conf.width = winsize.width + 1
+  float_conf.anchor = anchor
+  local old_conf = vim.api.nvim_win_get_config(winid)
+  vim.api.nvim_win_set_config(winid, float_conf)
+  local width = old_conf.width - 1
+  --NOTE: Empty lines must be filled with spaces or previous characters may remain
+  contents = vim
+    .iter(contents)
+    :map(function(text)
+      local blank = width - #text
+      return text .. (' '):rep(blank)
+    end)
+    :totable()
+  vim.api.nvim_buf_set_text(bufnr, 0, 0, -1, -1, contents)
+end
 return M

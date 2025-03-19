@@ -36,6 +36,60 @@ local function set_hint_hl()
   vim.api.nvim_set_hl(ns, 'FloatBorder', { link = border })
 end
 
+---@param regname string
+---@return true?
+local function _match_number_register(regname)
+  return ('0123456789'):find(regname, 1, true) and true
+end
+
+---@param increase boolean
+---@param key {next:string,prev:string}
+---@return string
+local function change_register(increase, key)
+  if vim.tbl_isempty(Instance) then
+    return increase and key.next or key.prev
+  end
+  if _match_number_register(Instance.regname) then
+    local regname ---@type integer
+    if increase then
+      regname = Instance.regname + 1
+      if regname > 9 then
+        regname = 0
+      end
+    else
+      regname = Instance.regname - 1
+      if regname < 0 then
+        regname = 9
+      end
+    end
+    Instance.regname = tostring(regname)
+  else
+    Instance.regname = increase and '0' or '9'
+  end
+  ---@diagnostic disable-next-line: redundant-parameter
+  Instance.reginfo.regcontents = vim.fn.getreg(Instance.regname, 0, true)
+  Instance:replace_regcontents()
+  if not vim.tbl_isempty(Instance.hint_options) then
+    vim.schedule(function()
+      require('rereope.render').infotip_overwrite(Instance.float[1], Instance.float[2], Instance.reginfo.regcontents)
+    end)
+  end
+  return ''
+end
+
+local function set_keymap(keys)
+  local key = {
+    prev = keys.prev or '<C-p>',
+    next = keys.next or '<C-n>',
+  }
+  vim.keymap.set('o', key.next, function()
+    return change_register(true, key)
+  end, { noremap = true, expr = true, desc = with_unique_name('[%s] increase the register number') })
+  vim.keymap.set('o', key.prev, function()
+    return change_register(false, key)
+  end, { noremap = true, expr = true, desc = with_unique_name('[%s] reduce the register number') })
+end
+
 ---@param hlgroup string
 local function set_visual_bg(hlgroup)
   if not hl_loaded or not vim.fn.hlexists(hlgroup) then
@@ -112,6 +166,7 @@ function Rereope.popup_hint(self)
   if vim.fn.reg_executing() == '' and not self.mode:find('[vV\x16]') then
     vim.schedule(function()
       local float_win = require('rereope.render').infotip(ns, self.reginfo.regcontents, self.hint_options)
+      self.float = float_win
       vim.api.nvim_create_autocmd({ 'ModeChanged' }, {
         desc = with_unique_name('%s: close hint window'),
         group = augroup,
@@ -120,6 +175,7 @@ function Rereope.popup_hint(self)
         callback = function(_)
           if float_win and vim.api.nvim_buf_is_valid(float_win[1]) then
             vim.api.nvim_buf_delete(float_win[1], { force = true })
+            Instance = {}
           end
         end,
       })
@@ -277,7 +333,7 @@ return {
 
   operator = function(motionwise)
     Instance:initial_related_options()
-    if Instance.is_repeat and Instance.regname:match('^[1-9]$') then
+    if Instance.is_repeat and _match_number_register(Instance.regname) then
       Instance:increase_reginfo()
       Instance:replace_regcontents()
     end
@@ -332,7 +388,11 @@ return {
     Instance.is_repeat = true
   end,
 
-  setup = function()
+  setup = function(opts)
     set_hint_hl()
+    if opts.map_cyclic_register_keys then
+      vim.validate('map_cyclic_register_keys', opts.map_cyclic_register_keys, { 'table', 'table' }, false)
+      set_keymap(opts.map_cyclic_register_keys)
+    end
   end,
 }
