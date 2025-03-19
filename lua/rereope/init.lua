@@ -214,7 +214,10 @@ end
 
 function Rereope:increase_reginfo()
   local new_number = tonumber(self.regname) + 1
-  self.regname = tostring(math.min(9, new_number))
+  if new_number > 9 then
+    new_number = 1
+  end
+  self.regname = tostring(new_number)
   self.reginfo = vim.fn.getreginfo(self.regname)
 end
 
