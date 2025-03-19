@@ -4,6 +4,13 @@ local M = {}
 
 ---@alias LogLevels 'TRACE'|'DEBUG'|'INFO'|'WARN'|'ERROR'|'OFF'
 
+---@param name string
+---@param message string
+---@param errorlevel LogLevels
+function M.notify(name, message, errorlevel)
+  vim.notify(message, vim.log.levels[string.upper(errorlevel)], { title = name })
+end
+
 -- Get the current utf encoding
 ---@param encoding? string
 ---@return string encoding

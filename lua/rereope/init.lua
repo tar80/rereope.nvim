@@ -1,6 +1,7 @@
 ---@class Rereope
 local Rereope = {}
 local Instance = {}
+local helper = require('rereope.helper')
 
 local UNIQUE_NAME = 'rereope.nvim'
 local OPERATOR_FUNC = "v:lua.require'rereope'.operator"
@@ -173,10 +174,10 @@ function Rereope:substitution(start_row, start_col, end_row, end_col)
       vim.api.nvim_put(reginfo.regcontents, 'b', false, false)
       return true
     else
-      vim.notify(
+      helper.notify(
+        UNIQUE_NAME,
         'The content of blockwise registers does not support pasting in visual-mode.',
-        vim.log.levels.INFO,
-        { title = UNIQUE_NAME }
+        vim.log.levels.INFO
       )
       return false
     end
@@ -233,7 +234,7 @@ end
 return {
   open = function(alterkey, opts)
     if vim.bo.readonly or not vim.bo.modifiable then
-      vim.notify('Could not replace. Write protected.', vim.log.levels.INFO, { title = UNIQUE_NAME })
+      helper.notify(UNIQUE_NAME, 'Could not replace. Write protected.', vim.log.levels.INFO)
       return
     end
     local rgx = '["%-%w:%.%%#%*%+~=_/]'
