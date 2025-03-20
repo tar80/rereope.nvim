@@ -10,7 +10,7 @@
 ---@field points_to string Register name currently pointed to
 
 ---@class Rereope:Instance
----@field new fun(regname:string,opts:RereopeOptions):Rereope
+---@field new fun(self:self,regname:string,opts:RereopeOptions):Rereope
 ---@field initial_related_options fun(self)
 ---@field restore_related_options fun(self)
 ---@field replace_regcontents fun(self)

@@ -114,40 +114,41 @@ vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
   end,
 })
 
-function Rereope.new(regname, opts)
+function Rereope:new(regname, opts)
   ---@class Rereope
-  local self = setmetatable({}, { __index = Rereope })
+  local instance = setmetatable({}, self)
+  self.__index = self
   opts = opts or {}
   opts.hint = opts.hint or {}
-  self['bufnr'] = vim.api.nvim_get_current_buf()
-  self['winid'] = vim.api.nvim_get_current_win()
-  self['mode'] = vim.api.nvim_get_mode().mode
-  self['selection'] = vim.go.selection
-  self['clipboard'] = vim.go.clipboard
-  self['virtualedit'] = vim.wo[self.winid].virtualedit
-  self['regname'] = regname
-  self['reginfo'] = vim.fn.getreginfo(self.regname)
-  self['end_point'] = opts.end_point
-  self['hint_options'] = opts.hint
-  self['beacon'] = type(opts.beacon) == 'table' and require('rereope.beacon').new(unpack(opts.beacon))
-  self['motion'] = opts.motion
-  self['replace'] = opts.replace
-  return self
+  instance['bufnr'] = vim.api.nvim_get_current_buf()
+  instance['winid'] = vim.api.nvim_get_current_win()
+  instance['mode'] = vim.api.nvim_get_mode().mode
+  instance['selection'] = vim.go.selection
+  instance['clipboard'] = vim.go.clipboard
+  instance['virtualedit'] = vim.wo[instance.winid].virtualedit
+  instance['regname'] = regname
+  instance['reginfo'] = vim.fn.getreginfo(instance.regname)
+  instance['end_point'] = opts.end_point
+  instance['hint_options'] = opts.hint
+  instance['beacon'] = type(opts.beacon) == 'table' and require('rereope.beacon').new(unpack(opts.beacon))
+  instance['motion'] = opts.motion
+  instance['replace'] = opts.replace
+  return instance
 end
 
-function Rereope.initial_related_options(self)
+function Rereope:initial_related_options()
   vim.o.clipboard = nil
   vim.o.selection = 'inclusive'
   vim.wo[self.winid].virtualedit = nil
 end
 
-function Rereope.restore_related_options(self)
+function Rereope:restore_related_options()
   vim.o.clipboard = self.clipboard
   vim.o.selection = self.selection
   vim.wo[self.winid].virtualedit = self.virtualedit
 end
 
-function Rereope.replace_regcontents(self)
+function Rereope:replace_regcontents()
   if self.replace and type(self.replace.fallback) == 'function' then
     if not self.replace.mode or self.mode:find(self.replace.mode, 1, true) then
       if not self.replace.regtype or self.reginfo.regtype:find(self.replace.regtype, 1, true) then
@@ -162,7 +163,7 @@ function Rereope.replace_regcontents(self)
   end
 end
 
-function Rereope.popup_hint(self)
+function Rereope:popup_hint()
   if vim.fn.reg_executing() == '' and not self.mode:find('[vV\x16]') then
     vim.schedule(function()
       local float_win = require('rereope.render').infotip(ns, self.reginfo.regcontents, self.hint_options)
@@ -312,7 +313,7 @@ return {
           return
         end
       end
-      Instance = Rereope.new(register, opts)
+      Instance = Rereope:new(register, opts)
       if not vim.tbl_isempty(Instance.reginfo) then
         if Instance.regname ~= '=' and type(Instance.replace) == 'table' then
           Instance:replace_regcontents()

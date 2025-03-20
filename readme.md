@@ -80,7 +80,7 @@ rereope.open(alternative-key, { end_point, beacon, hint, motion, replace })
 {
     'tar80/rereope.nvim',
     opts = {
-        map_cyclic_register_keys = { prev = '<C-p>', next = '<C-n>' },
+        map_cyclic_register_keys = nil -- { prev = '<C-p>', next = '<C-n>' },
     },
     keys = {
         ...
