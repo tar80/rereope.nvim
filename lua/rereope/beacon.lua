@@ -1,3 +1,17 @@
+---@class Beacon:BeaconInstance
+---@field new fun(hl:string,interval:integer,blend:integer,decay:integer):BeaconInstance
+---@field around_cursor? fun(self,winid:integer)
+---@field replaced_region fun(self,regcontents:string,height:integer,end_point:boolean)
+
+---@class BeaconInstance
+---@field timer uv.uv_timer_t
+---@field is_running boolean
+---@field hlgroup string
+---@field interval integer
+---@field blend integer
+---@field decay integer
+
+---@class Beacon
 local M = {}
 local helper = require('rereope.helper')
 local validate = require('rereope.compat').validate
@@ -34,13 +48,16 @@ end
 ---@alias WindowRelative 'editor'|'win'|'cursor'|'mouse'
 ---@alias WindowRegion {height:integer,width:integer,row:integer,col:integer,relative:WindowRelative}
 
+---@param text string The text that was replaced.
+---@param height integer The height of the replaced region.
+---@param end_point boolean Indicates whether the replacement happened at the end of a line.
 function M:replaced_region(text, height, end_point)
   local textwidth = vim.api.nvim_strwidth(text)
   local cur_charwidth = helper.charwidth(text, 0)
   local region = {
     height = height,
     width = textwidth,
-    row = end_point and 1 - height or 0,
+    row = end_point and (1 - height) or 0,
     col = end_point and (cur_charwidth - textwidth) or 0,
     relative = 'cursor',
   }

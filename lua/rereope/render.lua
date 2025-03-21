@@ -53,6 +53,7 @@ end
 ---@param ns integer Namespace
 ---@param contents string[]
 ---@param opts {winblend?:integer,border?:string[]}
+---@return integer[]?
 function M.infotip(ns, contents, opts)
   local has_contents, winsize = get_winsize(contents)
   if not has_contents then

@@ -1,5 +1,6 @@
 ---@class Rereope
 local Rereope = {}
+---@type Instance|{}
 local Instance = {}
 local helper = require('rereope.helper')
 
@@ -38,7 +39,7 @@ end
 
 ---@param regname string
 ---@return true?
-local function _match_number_register(regname)
+local function match_number_register(regname)
   return ('0123456789'):find(regname, 1, true) and true
 end
 
@@ -49,7 +50,7 @@ local function change_register(increase, key)
   if vim.tbl_isempty(Instance) then
     return increase and key.next or key.prev
   end
-  if _match_number_register(Instance.regname) then
+  if match_number_register(Instance.regname) then
     local regname ---@type integer
     if increase then
       regname = Instance.regname + 1
@@ -66,9 +67,8 @@ local function change_register(increase, key)
   else
     Instance.regname = increase and '0' or '9'
   end
-  ---@diagnostic disable-next-line: redundant-parameter
-  Instance.reginfo.regcontents = vim.fn.getreg(Instance.regname, 0, true)
-  Instance:replace_regcontents()
+  Instance.reginfo.regcontents = vim.fn.getreg(Instance.regname, 0, true) --[=[@as string[]]=]
+  Rereope:replace_regcontents()
   if not vim.tbl_isempty(Instance.hint_options) then
     vim.schedule(function()
       require('rereope.render').infotip_overwrite(Instance.float[1], Instance.float[2], Instance.reginfo.regcontents)
@@ -78,10 +78,7 @@ local function change_register(increase, key)
 end
 
 local function set_keymap(keys)
-  local key = {
-    prev = keys.prev or '<C-p>',
-    next = keys.next or '<C-n>',
-  }
+  local key = { next = keys.next or '<C-n>', prev = keys.prev or '<C-p>' }
   vim.keymap.set('o', key.next, function()
     return change_register(true, key)
   end, { noremap = true, expr = true, desc = with_unique_name('[%s] increase the register number') })
@@ -115,11 +112,9 @@ vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
 })
 
 function Rereope:new(regname, opts)
-  ---@class Rereope
-  local instance = setmetatable({}, self)
-  self.__index = self
   opts = opts or {}
   opts.hint = opts.hint or {}
+  local instance = {}
   instance['bufnr'] = vim.api.nvim_get_current_buf()
   instance['winid'] = vim.api.nvim_get_current_win()
   instance['mode'] = vim.api.nvim_get_mode().mode
@@ -139,24 +134,24 @@ end
 function Rereope:initial_related_options()
   vim.o.clipboard = nil
   vim.o.selection = 'inclusive'
-  vim.wo[self.winid].virtualedit = nil
+  vim.wo[Instance.winid].virtualedit = nil
 end
 
 function Rereope:restore_related_options()
-  vim.o.clipboard = self.clipboard
-  vim.o.selection = self.selection
-  vim.wo[self.winid].virtualedit = self.virtualedit
+  vim.o.clipboard = Instance.clipboard
+  vim.o.selection = Instance.selection
+  vim.wo[Instance.winid].virtualedit = Instance.virtualedit
 end
 
 function Rereope:replace_regcontents()
-  if self.replace and type(self.replace.fallback) == 'function' then
-    if not self.replace.mode or self.mode:find(self.replace.mode, 1, true) then
-      if not self.replace.regtype or self.reginfo.regtype:find(self.replace.regtype, 1, true) then
-        if not self.replace.regname or self.replace.regname == self.regname then
-          local iter = vim.iter(self.reginfo.regcontents):map(function(line)
-            return self.replace.fallback(line)
+  if Instance.replace and type(Instance.replace.fallback) == 'function' then
+    if not Instance.replace.mode or Instance.mode:find(Instance.replace.mode, 1, true) then
+      if not Instance.replace.regtype or Instance.reginfo.regtype:find(Instance.replace.regtype, 1, true) then
+        if not Instance.replace.regname or Instance.replace.regname == Instance.regname then
+          local iter = vim.iter(Instance.reginfo.regcontents):map(function(line)
+            return Instance.replace.fallback(line)
           end)
-          self.reginfo.regcontents = iter:totable()
+          Instance.reginfo.regcontents = iter:totable()
         end
       end
     end
@@ -164,10 +159,10 @@ function Rereope:replace_regcontents()
 end
 
 function Rereope:popup_hint()
-  if vim.fn.reg_executing() == '' and not self.mode:find('[vV\x16]') then
+  if vim.fn.reg_executing() == '' and not Instance.mode:find('[vV\x16]') then
     vim.schedule(function()
-      local float_win = require('rereope.render').infotip(ns, self.reginfo.regcontents, self.hint_options)
-      self.float = float_win
+      local float_win = require('rereope.render').infotip(ns, Instance.reginfo.regcontents, Instance.hint_options)
+      Instance.float = float_win
       vim.api.nvim_create_autocmd({ 'ModeChanged' }, {
         desc = with_unique_name('%s: close hint window'),
         group = augroup,
@@ -176,7 +171,6 @@ function Rereope:popup_hint()
         callback = function(_)
           if float_win and vim.api.nvim_buf_is_valid(float_win[1]) then
             vim.api.nvim_buf_delete(float_win[1], { force = true })
-            Instance = {}
           end
         end,
       })
@@ -218,14 +212,14 @@ local function extract_region(from, to, inclusive)
 end
 
 function Rereope:substitution(start_row, start_col, end_row, end_col)
-  local reginfo = self.reginfo
+  local reginfo = Instance.reginfo
   local line_count = #reginfo.regcontents
   if is_blockwise(reginfo.regtype) then
     if start_row == end_row then
       for i = 0, line_count - 1 do
         local row = start_row + i
         if vim.fn.col({ row + 1, '$' }) > end_col then
-          vim.api.nvim_buf_set_text(self.bufnr, row, start_col, row, end_col, { '' })
+          vim.api.nvim_buf_set_text(Instance.bufnr, row, start_col, row, end_col, { '' })
         end
       end
       vim.api.nvim_put(reginfo.regcontents, 'b', false, false)
@@ -238,9 +232,9 @@ function Rereope:substitution(start_row, start_col, end_row, end_col)
       )
       return false
     end
-  elseif is_blockwise(self.mode) then
+  elseif is_blockwise(Instance.mode) then
     local row_range = end_row - start_row
-    local cur_row, cur_col = unpack(vim.api.nvim_win_get_cursor(self.winid))
+    local cur_row, cur_col = unpack(vim.api.nvim_win_get_cursor(Instance.winid))
     local diff_row = (cur_row - 1) - start_row
     local diff_col = cur_col - start_col
     local row
@@ -248,7 +242,7 @@ function Rereope:substitution(start_row, start_col, end_row, end_col)
       row = start_row + i + diff_row
       if vim.fn.col({ row + 1, '$' }) > (end_col + diff_col) then
         vim.api.nvim_buf_set_text(
-          self.bufnr,
+          Instance.bufnr,
           row,
           start_col + diff_col,
           row,
@@ -259,23 +253,23 @@ function Rereope:substitution(start_row, start_col, end_row, end_col)
     end
     end_row = row + 1
     end_col = start_col + #reginfo.regcontents[line_count] - 1
-    vim.api.nvim_buf_set_mark(self.bufnr, ']', end_row, end_col, {})
+    vim.api.nvim_buf_set_mark(Instance.bufnr, ']', end_row, end_col, {})
     return true
   end
-  vim.api.nvim_buf_set_text(self.bufnr, start_row, start_col, end_row, end_col, reginfo.regcontents)
+  vim.api.nvim_buf_set_text(Instance.bufnr, start_row, start_col, end_row, end_col, reginfo.regcontents)
   end_row = start_row + line_count
   end_col = start_col + #reginfo.regcontents[line_count] - 1
-  vim.api.nvim_buf_set_mark(self.bufnr, ']', end_row, end_col, {})
+  vim.api.nvim_buf_set_mark(Instance.bufnr, ']', end_row, end_col, {})
   return true
 end
 
 function Rereope:increase_reginfo()
-  local new_number = tonumber(self.regname) + 1
+  local new_number = tonumber(Instance.regname) + 1
   if new_number > 9 then
     new_number = 1
   end
-  self.regname = tostring(new_number)
-  self.reginfo = vim.fn.getreginfo(self.regname)
+  Instance.regname = tostring(new_number)
+  Instance.reginfo = vim.fn.getreginfo(Instance.regname)
 end
 
 -- Display the expression input bar and set the obtained expression in the register
@@ -316,10 +310,10 @@ return {
       Instance = Rereope:new(register, opts)
       if not vim.tbl_isempty(Instance.reginfo) then
         if Instance.regname ~= '=' and type(Instance.replace) == 'table' then
-          Instance:replace_regcontents()
+          Rereope:replace_regcontents()
         end
         if not vim.tbl_isempty(Instance.hint_options) then
-          Instance:popup_hint()
+          Rereope:popup_hint()
         end
         set_operatorfunc()
         vim.api.nvim_feedkeys('g@', 'n', false)
@@ -333,20 +327,20 @@ return {
   end,
 
   operator = function(motionwise)
-    Instance:initial_related_options()
-    if Instance.is_repeat and _match_number_register(Instance.regname) then
-      Instance:increase_reginfo()
-      Instance:replace_regcontents()
+    Rereope:initial_related_options()
+    if Instance.is_repeat and match_number_register(Instance.regname) then
+      Rereope:increase_reginfo()
+      Rereope:replace_regcontents()
     end
     if Instance.regname == '=' then
       ---@diagnostic disable-next-line: redundant-parameter
-      Instance.reginfo.regcontents = vim.fn.getreg('=', 0, true)
-      Instance:replace_regcontents()
+      Instance.reginfo.regcontents = vim.fn.getreg('=', 0, true) --[=[@as string[]]=]
+      Rereope:replace_regcontents()
     end
 
     ---@type integer,integer,integer,integer
     local start_row, start_col, end_row, end_col
-    Instance.motionwise = motionwise
+    Rereope.motionwise = motionwise
     if Instance.mode:find('vV') then
       start_row, start_col, end_row, end_col = extract_region("'<", "'>", true)
     else
@@ -362,7 +356,7 @@ return {
       return
     end
 
-    local success = Instance:substitution(start_row, start_col, end_row, end_col)
+    local success = Rereope:substitution(start_row, start_col, end_row, end_col)
     if not success then
       return
     end
@@ -385,7 +379,7 @@ return {
       end
     end
 
-    Instance:restore_related_options()
+    Rereope:restore_related_options()
     Instance.is_repeat = true
   end,
 

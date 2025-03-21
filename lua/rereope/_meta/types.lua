@@ -1,3 +1,5 @@
+---@meta
+
 ---@alias OptBeacon [string,integer,integer,integer]
 ---@alias Hint {winblend:integer,border:string[]}
 ---@alias Replace {mode?:string,regname?:string,regtype?:string,fallback:fun(line:string):string}
@@ -9,8 +11,8 @@
 ---@field isunnamed boolean Un-named register or not
 ---@field points_to string Register name currently pointed to
 
----@class Rereope:Instance
----@field new fun(self:self,regname:string,opts:RereopeOptions):Rereope
+---@class Rereope
+---@field new fun(self:self,regname:string,opts:RereopeOptions):Instance
 ---@field initial_related_options fun(self)
 ---@field restore_related_options fun(self)
 ---@field replace_regcontents fun(self)
@@ -36,17 +38,4 @@
 ---@field replace Replace
 ---@field motion fun()
 ---@field is_repeat boolean
----@field float [integer,integer]
-
----@class Beacon:BeaconInstance
----@field new fun(hl:string,interval:integer,blend:integer,decay:integer):BeaconInstance
----@field around_cursor? fun(self,winid:integer)
----@field replaced_region fun(self,regcontents:string[],height:integer,end_point:boolean)
-
----@class BeaconInstance
----@field timer uv.uv_timer_t
----@field is_running boolean
----@field hlgroup string
----@field interval integer
----@field blend integer
----@field decay integer
+---@field float [integer,integer]?
