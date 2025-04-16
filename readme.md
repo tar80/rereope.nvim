@@ -4,8 +4,8 @@
 
 ## Requirements
 
-- Neovim >= 0.10.0
-  <!-- - [tartare.nvim](https://github.com/tar80/tartare.nvim) **(optional)** -->
+- Neovim >= 0.11.0
+  <!-- - [tartar.nvim](https://github.com/tar80/tartar.nvim) **(optional)** -->
   <!--   This library module is exclusively for the plugins I created. -->
   <!--   It is not usually necessary, but it is used to optimize the loading of duplicate modules. -->
 

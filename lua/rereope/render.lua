@@ -97,4 +97,5 @@ function M.infotip_overwrite(bufnr, winid, contents)
   vim.api.nvim_win_set_config(winid, float_conf)
   vim.api.nvim_buf_set_text(bufnr, 0, 0, -1, -1, contents)
 end
+
 return M
