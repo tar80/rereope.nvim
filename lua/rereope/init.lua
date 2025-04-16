@@ -2,7 +2,6 @@
 local Rereope = {}
 ---@type Instance|{}
 local Instance = {}
-local helper = require('rereope.helper')
 
 local UNIQUE_NAME = 'rereope.nvim'
 local OPERATOR_FUNC = "v:lua.require'rereope'.operator"
@@ -37,7 +36,7 @@ local function set_hint_hl()
   vim.api.nvim_set_hl(ns, 'FloatBorder', { link = border })
 end
 
----@param regname string
+---@param regname string|integer
 ---@return true?
 local function match_number_register(regname)
   return ('0123456789'):find(regname, 1, true) and true
@@ -51,16 +50,16 @@ local function change_register(increase, key)
     return increase and key.next or key.prev
   end
   if match_number_register(Instance.regname) then
-    local regname ---@type integer
+    local regname ---@type integer|string
     if increase then
       regname = Instance.regname + 1
       if regname > 9 then
-        regname = 0
+        regname = match_number_register(Instance.held_regname) and 0 or Instance.held_regname
       end
     else
       regname = Instance.regname - 1
       if regname < 0 then
-        regname = 9
+        regname = match_number_register(Instance.held_regname) and 9 or Instance.held_regname
       end
     end
     Instance.regname = tostring(regname)
@@ -121,6 +120,7 @@ function Rereope:new(regname, opts)
   instance['selection'] = vim.go.selection
   instance['clipboard'] = vim.go.clipboard
   instance['virtualedit'] = vim.wo[instance.winid].virtualedit
+  instance['held_regname'] = regname
   instance['regname'] = regname
   instance['reginfo'] = vim.fn.getreginfo(instance.regname)
   instance['end_point'] = opts.end_point
@@ -225,10 +225,10 @@ function Rereope:substitution(start_row, start_col, end_row, end_col)
       vim.api.nvim_put(reginfo.regcontents, 'b', false, false)
       return true
     else
-      helper.notify(
-        UNIQUE_NAME,
+      vim.notify(
         'The content of blockwise registers does not support pasting in visual-mode.',
-        vim.log.levels.INFO
+        vim.log.levels.INFO,
+        { title = UNIQUE_NAME }
       )
       return false
     end
@@ -288,7 +288,7 @@ end
 return {
   open = function(alterkey, opts)
     if vim.bo.readonly or not vim.bo.modifiable then
-      helper.notify(UNIQUE_NAME, 'Could not replace. Write protected.', vim.log.levels.INFO)
+      vim.notify('Could not replace. Write protected.', vim.log.levels.INFO, { title = UNIQUE_NAME })
       return
     end
     local rgx = '["%-%w:%.%%#%*%+~=_/]'

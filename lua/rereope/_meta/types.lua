@@ -30,8 +30,9 @@
 ---@field selection 'old'|'inclusive'|'exclusive'
 ---@field clipboard string
 ---@field virtualedit 'block'|'insert'|'all'|'onemore'|'none'|'NONE'
----@field regname string
----@field reginfo Reginfo
+---@field held_regname string First specified register name
+---@field regname string Current specified register name
+---@field reginfo Reginfo Current register information
 ---@field end_point boolean
 ---@field hint_options Hint
 ---@field beacon Beacon|false
