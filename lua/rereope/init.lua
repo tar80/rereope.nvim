@@ -2,6 +2,7 @@
 local Rereope = {}
 ---@type Instance|{}
 local Instance = {}
+local is_blockwise = require('rereope.helper').is_blockwise
 
 local UNIQUE_NAME = 'rereope.nvim'
 local OPERATOR_FUNC = "v:lua.require'rereope'.operator"
@@ -38,7 +39,7 @@ end
 
 ---@param regname string|integer
 ---@return true?
-local function match_number_register(regname)
+local function match_numbered_register(regname)
   return ('0123456789'):find(regname, 1, true) and true
 end
 
@@ -49,17 +50,17 @@ local function change_register(increase, key)
   if vim.tbl_isempty(Instance) then
     return increase and key.next or key.prev
   end
-  if match_number_register(Instance.regname) then
+  if match_numbered_register(Instance.regname) then
     local regname ---@type integer|string
     if increase then
       regname = Instance.regname + 1
       if regname > 9 then
-        regname = match_number_register(Instance.held_regname) and 0 or Instance.held_regname
+        regname = match_numbered_register(Instance.held_regname) and 0 or Instance.held_regname
       end
     else
       regname = Instance.regname - 1
       if regname < 0 then
-        regname = match_number_register(Instance.held_regname) and 9 or Instance.held_regname
+        regname = match_numbered_register(Instance.held_regname) and 9 or Instance.held_regname
       end
     end
     Instance.regname = tostring(regname)
@@ -176,12 +177,6 @@ function Rereope:popup_hint()
       })
     end)
   end
-end
-
----@param regtype string
----@return boolean
-local function is_blockwise(regtype)
-  return regtype:find('\x16', 1, true) ~= nil
 end
 
 -- Adjust the number for 0-based
@@ -328,7 +323,7 @@ return {
 
   operator = function(motionwise)
     Rereope:initial_related_options()
-    if Instance.is_repeat and match_number_register(Instance.regname) then
+    if Instance.is_repeat and match_numbered_register(Instance.regname) then
       Rereope:increase_reginfo()
       Rereope:replace_regcontents()
     end
