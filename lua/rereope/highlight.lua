@@ -1,22 +1,42 @@
 local M = {}
 
+---@param int integer
+---@return string hex
+local function num_to_hex(int)
+  local hex = string.format('%X', int)
+  local len = #hex
+  if len <= 6 then
+    hex = string.rep('0', 6 - len) .. hex
+  end
+  return '#' .. hex
+end
+
+---@param value string|number
+---@return boolean ok, string hex
+local function value_to_hex(value)
+  local value_type = type(value)
+  if value_type == 'number' then
+    value = num_to_hex(value)
+  end
+  if value:len() ~= 7 or not value:lower():match('^#[1234567890abcdef]*$') then
+    return false, ''
+  end
+
+  return true, value
+end
+
+---Simple RGB color fader
 ---@param rgb string|integer
 ---@param attenuation number
 ---@return boolean ok, string RGB
 function M.fade_color(rgb, attenuation)
-  local rgb_type = type(rgb)
-  if rgb_type == 'number' then
-    rgb = string.format('%X', rgb)
-  elseif rgb_type == 'string' then
-    if #rgb > 6 then
-      rgb = rgb:sub(-6)
-    end
-  else
-    return false, ''
+  local ok, hex = value_to_hex(rgb)
+  if not ok then
+    return false, 'rgb must be color-code.'
   end
-  local r = tonumber(rgb:sub(1, 2), 16)
-  local g = tonumber(rgb:sub(3, 4), 16)
-  local b = tonumber(rgb:sub(5, 6), 16)
+  local r = tonumber(hex:sub(1, 2), 16)
+  local g = tonumber(hex:sub(3, 4), 16)
+  local b = tonumber(hex:sub(5, 6), 16)
 
   if attenuation < 0 or attenuation > 100 then
     return false, 'Invalid attenuation value'

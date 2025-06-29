@@ -328,7 +328,6 @@ return {
       Rereope:replace_regcontents()
     end
     if Instance.regname == '=' then
-      ---@diagnostic disable-next-line: redundant-parameter
       Instance.reginfo.regcontents = vim.fn.getreg('=', 0, true) --[=[@as string[]]=]
       Rereope:replace_regcontents()
     end
@@ -336,7 +335,7 @@ return {
     ---@type integer,integer,integer,integer
     local start_row, start_col, end_row, end_col
     Rereope.motionwise = motionwise
-    if Instance.mode:find('vV') then
+    if Instance.mode:find('vV', 1, true) then
       start_row, start_col, end_row, end_col = extract_region("'<", "'>", true)
     else
       start_row, start_col, end_row, end_col = extract_region("'[", "']", true)

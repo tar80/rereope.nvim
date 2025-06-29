@@ -1,4 +1,4 @@
---NOTE: This module is provided to ensure compatibility with version 0.10.
+--NOTE: This module is provided to ensure compatibility with version 0.11.
 
 local M = {}
 
