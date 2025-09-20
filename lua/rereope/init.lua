@@ -94,7 +94,7 @@ local function set_visual_bg(hlgroup)
     local rgb = vim.api.nvim_get_hl(0, { name = hlgroup, create = false })
     local base_bg = rgb.reverse and rgb.fg or rgb.bg
     if base_bg then
-      local ok, bg = require('rereope.highlight').fade_color(base_bg, 50)
+      local ok, bg = require('rereope.highlight').fade_color(base_bg, 70)
       if ok then
         vim.api.nvim_set_hl(0, HLGROUP.VISUAL_BG, { default = true, bg = bg })
       end
