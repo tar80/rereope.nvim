@@ -132,6 +132,11 @@ end, {desc = 'Rereope open linewise'})
 <details>
 <summary> FIFO with format </summary>
 
+When the `replace` option is specified with a fallback and a numbered register
+is expanded and pasted, FIFO mode becomes active. In this mode, each time the
+dot repeat (`.`) is used, the number of the next numbered register to be expanded is
+automatically incremented.
+
 ```lua
 local opts = {
     end_point = false,
