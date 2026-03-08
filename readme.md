@@ -1,6 +1,9 @@
+
 # Rereope.nvim
 
 **Re**place with **Re**gister **Ope**rator
+
+A flexible and repeatable replacement operator for Neovim.
 
 ## Requirements
 
@@ -11,7 +14,7 @@
 
 ## Demo
 
-Take a peek at these demo clips.
+Take a peek at these features in action:
 
 ![rereope_standard](https://github.com/user-attachments/assets/7e3ae709-a0d8-411d-b25e-1e1112fbefac)
 
@@ -27,7 +30,7 @@ Take a peek at these demo clips.
 
 ## Usage
 
-Rereope provides only one method `rereope.open`.
+Rereope provides a single entry point: `require('rereope').open()`.
 
 `rereope.open` first inputs the trigger key, followed by the register key.  
 For example: `<trigger-key>[register-key]{motion}`.
@@ -50,26 +53,26 @@ rereope.open(alternative-key, { end_point, beacon, hint, motion, replace })
 ---@class RereopeOptions
 
 ---@field end_point boolean
---- Move cursor to end of past range.
+-- Move cursor to end of past range.
 
 ---@field beacon [ hlgroup:string, interval:integer, winblend:integer, decay:integer ]
----  Flash the replaced text.
+--  Flash the replaced text.
 
 ---@field hint { winblend:integer, border:string[]|nil } Floating window option values
---- Popup hint select register contents.
+-- Popup hint select register contents.
 
 ---@field motion fun()
---- Automatically execute motion after register selection.
+-- Automatically execute motion after register selection.
 
 ---@field replace {
----         mode:string|nil,
----         regname:string|nil,
----         regtype:string|nil,
----         fallback: fun(line:string):line:string
----       }
---- Format the register contents before pasting them.
---- Specifying `mode`, `regname`, and `regtype` will perform conditional judgment.
---- You can use fallbacks to process replacements line by line.
+--         mode:string|nil,
+--         regname:string|nil,
+--         regtype:string|nil,
+--         fallback: fun(line:string):line:string
+--       }
+-- Format the register contents before pasting them.
+-- Specifying `mode`, `regname`, and `regtype` will perform conditional judgment.
+-- You can use fallbacks to process replacements line by line.
 ```
 
 ## Installation
@@ -100,12 +103,6 @@ rereope.open(alternative-key, { end_point, beacon, hint, motion, replace })
 <summary> Standard replace </summary>
 
 ```lua
-local opts = {
-    end_point = true,
-    beacon = {},
-    hint = {},
-}
-
 -- Respects vim-operator-replace
 vim.keymap.set({'n', 'x'}, '_', function()
     local opts = {}
@@ -171,9 +168,9 @@ without using the motion option.
 
 ## Highlights
 
-- `RereopeHintBg` (defalut:`PmenuSel`) Uses popup hint
-- `RereopeHintBorder` (default:`PmenuSel`) Uses popup hint
-- `RereopeVisualFlash` (default:`IncSearch`) Uses replaced linewise contents
+- `RereopeHintBg` (default: `DiffAdd`) Uses popup hint
+- `RereopeHintBorder` (default: `DiffChange`) Uses popup hint
+- `RereopeVisualFlash` (default: `VisualNOS`) Uses replaced linewise contents
 
 ### Issues
 

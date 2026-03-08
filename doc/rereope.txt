@@ -8,9 +8,9 @@ CONTENTS                                                      *rereope-contents*
 
 Introduction                                              |rereope-introduction|
 Interface                                                    |rereope-interface|
-  function                                                    |rereope-function|
-  configuration                                          |rereope-configuration|
-  hlgroup                                                      |rereope-hlgroup|
+  Function                                                    |rereope-function|
+  Configuration                                          |rereope-configuration|
+  Hlgroup                                                      |rereope-hlgroup|
 
 ==============================================================================
 INTRODUCTION                                              *rereope-introduction*
@@ -26,19 +26,21 @@ FUNCTION                                                      *rereope-function*
 
 setup({cfg})                                                   *rereope.setup()*
 
-    Setup rereope
+    Setup rereope.
 
         Parameters: ~
-              {map_cyclic_register_keys} (talbe): |rereope-cyclic-register-keys|
+        {cfg} (table):
+            {map_cyclic_register_keys} (table): |rereope-cyclic-register-keys|
 
 
-open(alternative-key, { end_point, beacon, hint, motion, replace })
+open(alternative-key, {opts})                                 *rereope.open()*
 
     Maps to the operator trigger key and is used as follows.
 
 >lua
         vim.keymap.set({'n', 'x'}, '_', function()
-            local opts = {replace = {
+            local opts = {
+                replace = {
                 fallback = function(line)
                     return line:format('- %s')
                 end
@@ -62,15 +64,17 @@ open(alternative-key, { end_point, beacon, hint, motion, replace })
            2. "[register-key]<trigger-key>{motion}
 
         Parameters: ~
-              {alternative-key} (string|nil): |rereope-alternative-key|
-              {end_point}       (boolean):    |rereope-end-point|
-              {beacon}          (dictionaly): |rereope-beacon|
-              {hint}            (table):      |rereope-hint|
-              {motion}          (function):   |rereope-motion|
-              {replace}         (table):      |rereope-replace|
+        {alternative-key} (string|nil): |rereope-alternative-key|
+        {opts} (table):
+            {end_point} (boolean): |rereope-end-point|
+            {beacon}    (table):   |rereope-beacon|
+            {hint}      (table):   |rereope-hint|
+            {motion}    (function):|rereope-motion|
+            {replace}   (table):   |rereope-replace|
 
 
-    rereope-alternative-key                            *rereope-alternative-key*
+                                                     *rereope-alternative-key*
+    rereope-alternative-key
 
             An alternative key for unnamed registers.
             This is provided for the simplification of key operations.
@@ -79,7 +83,8 @@ open(alternative-key, { end_point, beacon, hint, motion, replace })
             Default: "\"
 
 
-    rereope-end-point                                        *rereope-end-point*
+                                                           *rereope-end-point*
+    rereope-end-point
 
             Moves the cursor to the end of the replacement string
             after executing the replacement.
@@ -87,31 +92,26 @@ open(alternative-key, { end_point, beacon, hint, motion, replace })
             Type: boolean
             Default: false
 
-    rereope-beacon                                              *rereope-beacon*
+                                                              *rereope-beacon*
+    rereope-beacon
 
             Flashes the replacement string.
 
-            Type: [
-                hlgroup: string,
-                interval: integer,
-                winblend: integer,
-                decay: integer
-            ]
+            Type: table [hlgroup, interval, winblend, decay]
             Default: nil
 
-    rereope-hint                                                  *rereope-hint*
+                                                                *rereope-hint*
+    rereope-hint
 
             Displays the contents of the register in a popup.
             Specify the value for the option 'winblend'.
             For border, please refer to |nvim_open_win()|.
 
-            Type: {
-                winblend:integer,
-                border:"single"|"double"|"rounded"|"solid"|"shadow"|string[]|nil
-            }
+            Type: table {winblend, border}
             Default: {}
 
-    rereope-motion                                              *rereope-motion*
+                                                              *rereope-motion*
+    rereope-motion
 
             Specifies the operator key to send after selecting the register.
 
@@ -119,12 +119,12 @@ open(alternative-key, { end_point, beacon, hint, motion, replace })
             Default: nil
 
 >lua
-            --You can send keys directly.
+            -- You can send keys directly.
             motion = function()
                 vim.api.nvim_input('_')
             end
 
-            -- Alternatively, you can send keys through the plugin.
+            -- Alternatively, you can combine with other plugins.
             motion = function()
                 if vim.treesitter.get_node() then
                 require('flash').treesitter()
@@ -132,23 +132,20 @@ open(alternative-key, { end_point, beacon, hint, motion, replace })
             end
 <
 
-rereope-replace                                                *rereope-replace*
+                                                             *rereope-replace*
+    rereope-replace
 
             Replaces and pastes the string from the register.
             The fallback is executed when the conditions for mode, regname,
             and regtype are met.
 
-            When the `replace` option is specified with a fallback and a numbered
-            register is expanded and pasted, FIFO mode becomes active.
-            In this mode, each time the dot repeat (`.`) is used, the number of
-            the next numbered register to be expanded is automatically incremented.
+            When the `replace` option is specified with a fallback and a
+            numbered register is expanded and pasted, FIFO mode becomes active.
+            In this mode, each time the dot repeat (`.`) is used, the number
+            of the next numbered register to be expanded is automatically
+            incremented.
 
-            Type: replace {
-                mode:string|nil,
-                regname:string|nil,
-                regtype:string|nil,
-                fallback: fun(line:string):line:string
-            }
+            Type: table {mode, regname, regtype, fallback}
             Default: nil
 
 >lua
@@ -162,15 +159,13 @@ rereope-replace                                                *rereope-replace*
 ------------------------------------------------------------------------------
 CONFIGURATION                                            *rereope-configuration*
 
-
-Default settings ~
-
-map_cyclic_register_keys                          *rereope-cyclic-register-keys*
+                                               *rereope-cyclic-register-keys*
+map_cyclic_register_keys
 
     Add next and previous register mapping to omap. This allows you to
     cycle through the 0-9 registers while in operator-pending mode.
 
-        Type: talbe,
+        Type: table
         Default: {
           next = '<C-n>',
           prev = '<C-p>',
@@ -180,15 +175,12 @@ map_cyclic_register_keys                          *rereope-cyclic-register-keys*
 HLGROUP                                                        *rereope-hlgroup*
 
 *RereopeHintBg*
-
         Used for the background of popup hints.
 
 *RereopeHintBorder*
-
         Used for the border of popup hints.
 
 *RereopeVisualFlash*
-
         Used for flashing multiple lines.
 
 ==============================================================================
