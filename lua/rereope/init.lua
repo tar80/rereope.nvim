@@ -193,17 +193,20 @@ end
 ---@param inclusive boolean Whether to include the last character in the range
 ---@return integer,integer,integer,integer `Range4`
 local function extract_region(from, to, inclusive)
-  ---@type integer,integer,integer,integer
-  local start_row, start_col, end_row, end_col
-  local last = inclusive and 0 or 1
-  start_row, start_col = vim.fn.line(from), vim.fn.col(from)
-  end_row, end_col = vim.fn.line(to), vim.fn.col(to) + last
-  local max_col = vim.fn.col({ end_row, '$' }) - 1
-  local line = vim.api.nvim_get_current_line()
-  if #line > 0 then
-    end_col = end_col + vim.str_utf_end(line, end_col)
+  local start_row, start_col = vim.fn.line(from), vim.fn.col(from)
+  local end_row, end_col = vim.fn.line(to), vim.fn.col(to)
+  if start_row == 0 or end_row == 0 then
+    local pos = vim.api.nvim_win_get_cursor(0)
+    return pos[1] - 1, pos[2], pos[1] - 1, pos[2]
   end
-  return start_row - 1, start_col - 1, end_row - 1, math.min(max_col, end_col)
+  local line = vim.api.nvim_buf_get_lines(0, end_row - 1, end_row, false)[1] or ''
+  local max_col = #line
+  if inclusive then
+    if #line > 0 and end_col >= 1 and end_col <= max_col then
+      end_col = end_col + vim.str_utf_end(line, end_col)
+    end
+  end
+  return math.max(0, start_row - 1), math.max(0, start_col - 1), math.max(0, end_row - 1), math.min(max_col, end_col)
 end
 
 function Rereope:substitution(start_row, start_col, end_row, end_col)
@@ -280,7 +283,7 @@ local function set_expression()
   return ok
 end
 
-return {
+local M = {
   open = function(alterkey, opts)
     if vim.bo.readonly or not vim.bo.modifiable then
       vim.notify('Could not replace. Write protected.', vim.log.levels.INFO, { title = UNIQUE_NAME })
@@ -322,6 +325,7 @@ return {
   end,
 
   operator = function(motionwise)
+    Instance.bufnr = vim.api.nvim_get_current_buf()
     Rereope:initial_related_options()
     if Instance.is_repeat and match_numbered_register(Instance.regname) then
       Rereope:increase_reginfo()
@@ -385,3 +389,16 @@ return {
     end
   end,
 }
+
+---@diagnostic disable-next-line: undefined-field
+if _G._TEST then
+  M.rereope = Rereope
+  M.get_instance = function()
+    return Instance
+  end
+  M.set_instance = function(val)
+    Instance = val
+  end
+end
+
+return M
