@@ -1,0 +1,82 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches:
+      - work
+  workflow_dispatch:
+
+concurrency:
+  group: ci-exclusive-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      needs_test: ${{ steps.filter.outputs.logic }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            logic:
+              - 'lua/**'
+              - 'tests/**'
+
+  # 2. テスト実行Job
+  test:
+    needs: changes
+    if: needs.changes.outputs.needs_test == 'true'
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: "stable"
+
+      - name: Setup StyLua
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --version
+
+      - name: Install Plenary
+        run: |
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim /tmp/plenary.nvim
+
+      - name: Run Tests
+        env:
+          STYLUA_PATH: stylua
+          PLENARY_PATH: /tmp/plenary.nvim
+        run: make all
+
+  deploy:
+    if: |
+      always() &&
+      github.repository_owner == 'tar80' &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped')
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Automated Merge
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          if ! git merge origin/work --ff-only; then
+            echo "Error: Fast-forward merge is not possible."
+            exit 1
+          fi
+          git push origin main
+          git push origin --delete work
